@@ -110,6 +110,14 @@ class Client
     protected $profileEditEndpoint = 'user/profile/edit';
 
     /**
+     * Contains SSO registration endpoint path.
+     *
+     * @var string
+     */
+
+    protected $registerEndpoint = 'registration';
+
+    /**
      * Contains API endpoint url.
      *
      * @var string
@@ -485,6 +493,16 @@ class Client
     public function getProfileEditUrl($redirect_url)
     {
         return $this->endpointBasePath . $this->profileEditEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+    }
+
+    /**
+     * Returns SSO registration url.
+     *
+     * @return string
+     */
+    public function getRegistrationUrl()
+    {
+        return $this->endpointBasePath . $this->registerEndpoint;
     }
 
     /**
