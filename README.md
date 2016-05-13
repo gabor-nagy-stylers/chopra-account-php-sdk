@@ -26,6 +26,9 @@ There is no autoloader in the SDK (yet), so all three files are needed to be put
 
 Operational process
 ===================
+Standard Integration Flow
+---------------------
+FLow chart of how to integrate this SDK into your system can be found [here](https://choprasso-public.s3.amazonaws.com/uploads/standard_integration_flow.png).
 
 Instantiation
 -------------
