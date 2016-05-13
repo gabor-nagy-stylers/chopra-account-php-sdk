@@ -500,9 +500,9 @@ class Client
      *
      * @return string
      */
-    public function getRegistrationUrl()
+    public function getRegistrationUrl($redirect_url)
     {
-        return $this->endpointBasePath . $this->registerEndpoint;
+        return $this->endpointBasePath . $this->registerEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
     }
 
     /**
