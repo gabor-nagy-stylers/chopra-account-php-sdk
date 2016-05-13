@@ -1,0 +1,22 @@
+{
+  "name": "stylers-llc/chopra-account-php-sdk",
+  "description": "SDK for Chopra Single Sign On system.",
+  "type": "library",
+  "keywords": ["sdk"],
+  "license": "MIT",
+  "homepage":"https://github.com/stylers-llc/chopra-account-php-sdk",
+  "authors": [
+    {
+      "name": "Gabor Nagy",
+      "email": "gabor.nagy@stylersonline.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "ChopraSSO\\SDK\\": "src/SDK/"
+    }
+  }
+}
