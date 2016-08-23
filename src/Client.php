@@ -161,7 +161,7 @@ class Client
      */
     public function __construct(Array $params)
     {
-        if (count($diff = array_diff(['client_key', 'client_secret', 'session_host', 'session_port'],
+        if (count($diff = array_diff(['client_key', 'client_secret'],
                 array_keys($params))) > 0
         ) {
             throw new \BadMethodCallException('Missing Chopra SDK parameters: ' . implode(", ", $diff));
@@ -334,7 +334,7 @@ class Client
     }
 
     /**
-     * Get error counter 
+     * Get error counter
      *
      * @return mixed
      */
@@ -367,7 +367,7 @@ class Client
     public function memberLoggedIn()
     {
         if (null === $this->user) {
-            throw new \Exception('Invalid method call: memberLoggedIn method was called without successful session validation!');
+            throw new \BadMethodCallException('Invalid method call: memberLoggedIn method was called without successful session validation!');
         }
         $user = $this->session()->get('user');
 
@@ -376,11 +376,15 @@ class Client
 
     /**
      * Returns the session instance.
-     *
      * @return bool
+     * @throws \BadMethodCallException
      */
     public function session()
     {
+        if (!$this->sessionHost || !$this->sessionPort) {
+            throw new \BadMethodCallException('Session: Missing session_host or session_port configuration!');
+        }
+
         if (!$this->session instanceof Session && $this->sessionHost && $this->sessionPort) {
             $this->session = new Session([
                 'memcache_host' => $this->sessionHost,
@@ -393,11 +397,15 @@ class Client
 
     /**
      * Returns the API instance.
-     *
      * @return bool
+     * @throws \BadMethodCallException
      */
     public function api()
     {
+        if (!$this->apiKey) {
+            throw new \BadMethodCallException('API: Missing api_key configuration!');
+        }
+
         if (!$this->api instanceof Api && $this->apiKey) {
             $this->api = new Api([
                 'client_key' => $this->clientKey,
@@ -477,6 +485,8 @@ class Client
      * Returns SSO Social Login url.
      *
      * @param $redirect_url Full qualified url to redirect back after successful login.
+     * @param $social_type Social authentication type, facebook or google
+     * @param array $social_data Social authentication data consists of id and token
      * @return string
      */
     public function getSocialLoginUrl($redirect_url, $social_type, Array $social_data)
@@ -487,7 +497,7 @@ class Client
     /**
      * Returns SSO Profile edit url.
      *
-     * @param $redirect_url Full qualified url to redirect back after editing profile.
+     * @param $redirect_url Fully qualified url to redirect back after editing profile.
      * @return string
      */
     public function getProfileEditUrl($redirect_url)
@@ -498,6 +508,7 @@ class Client
     /**
      * Returns SSO registration url.
      *
+     * @param $redirect_url Fully qualified url to redirect back after login.
      * @return string
      */
     public function getRegistrationUrl($redirect_url)
