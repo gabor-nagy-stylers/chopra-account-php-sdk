@@ -145,3 +145,16 @@ The processing workflow following the redirect is the same as in the case of a n
 
 After the local social auth you can redirect the user back to the return URL what you get back from getSocialLoginUrl method.
 
+Retreiving Sage User ID from SSO
+------------------------------------
+You can easily retreive a Sage User ID for an SSO user by a simple API call to SSO Api endpoint. If user not exists in Sage system, it will be automatically created. 
+You can do this with the SDK like this:
+```php
+        $sageUser = $client->api()->makeCall(
+            'mas_user_id',
+            'POST',
+            [],
+            $postData
+        );
+```
+
