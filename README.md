@@ -147,7 +147,7 @@ After the local social auth you can redirect the user back to the return URL wha
 
 Create Sage User ID for SSO User
 ------------------------------------
-You can easily create a Sage User ID for an SSO user by a simple API call to SSO Api endpoint. If user not exists in Sage system, it will be automatically created. 
+By default User datas returned by getUser method contains the Sage User ID for the user. But if not, you can easily create a Sage User ID for an SSO user by a simple API call to SSO API endpoint. If user not exists in Sage system, it will be automatically created. 
 You can do this with the SDK like this:
 ```php
         $postData = [
