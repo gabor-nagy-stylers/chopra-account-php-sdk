@@ -43,12 +43,17 @@ $client = new Client([
 	'session_host' => '[memcache_host_name]',
 	'session_port' => '[memcache_port]',
 	'endpoint_basepath' => 'http://account.chopra.com/', 
-    // endpoint_basepath is only necessary in dev environment – the live domain is predefined into the SDK.
 	'api_key' => '[api_secret_key]',
 	'api_endpoint' => 'http://account-api.chopra.com/', 
-    // api_endpoint is only necessary in dev environment – the live domain is predefined into the SDK.
+    'cookie_domain' => '[cookie_domain]'
 ]);
 ```
+
+#### Client Parameters
+* __endpoint_basepath:__ only necessary in dev environment – the live domain is predefined into the SDK.
+* __api_endpoint:__ api_endpoint is only necessary in dev environment – the live domain is predefined into the SDK.
+* __cookie_domain:__ cookie domain is optional. if not provided, sdk generates it from $_SERVER request parameters. it must be the main domain of your system. if you use multiple subdomains for the same authentication system, than you should provide the main domain without subdomain. if your entire site is on a subdomain you have to provide the full domain with subdomain, eg. ayurveda.chopra.com
+
 **!Notice:** Code above and session check below with redirection have to run ONLY when http request is initiated by a browser, or in other cases where it’s necessary. Do not include it when your system is requested by a cron job, or running in CLI.
 
 Session check
