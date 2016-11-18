@@ -154,6 +154,13 @@ class Client
     protected $memcacheConnectTolerance = 3;
 
     /**
+     * Contains the main domain for cookies of client platform
+     *
+     * @var string
+     */
+    protected $cookieDomain;
+
+    /**
      * Initializes the SSO SDK Client object, and API / Session objects if needed.
      *
      * @param array $params Associative array with appropriate parameters for SSO connection.
@@ -189,6 +196,10 @@ class Client
             $this->apiEndpoint = $params['api_endpoint'];
         }
 
+        if (array_key_exists('cookie_domain', $params)) {
+            $this->cookieDomain = $params['cookie_domain'];
+        }
+
     }
 
     /**
@@ -196,8 +207,12 @@ class Client
      *
      * @return string
      */
-    protected function getBaseHttpHost()
+    protected function getCookieDomain()
     {
+        if (null !== $this->cookieDomain) {
+            return $this->cookieDomain;
+        }
+
         if (array_key_exists('HTTP_X_FORWARDED_HOST', $_SERVER)) {
             $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
         } else {
@@ -208,7 +223,14 @@ class Client
         if (count($segments) < 2) {
             return $host;
         }
-        return $segments[count($segments) - 2] . '.' . $segments[count($segments) - 1];
+        $this->cookieDomain = $segments[count($segments) - 2] . '.' . $segments[count($segments) - 1];
+
+        return $this->cookieDomain;
+    }
+
+    public function setCookieDomain($domain)
+    {
+        $this->cookieDomain = trim($domain, '.');
     }
 
     /**
@@ -218,7 +240,7 @@ class Client
      */
     protected function handleSSOResponse()
     {
-        setcookie($this->cookieName, $_GET['sso_code'], time() + 31556926, '/', '.' . $this->getBaseHttpHost());
+        setcookie($this->cookieName, $_GET['sso_code'], time() + 31556926, '/', '.' . $this->getCookieDomain());
         $_COOKIE[$this->cookieName] = $_GET['sso_code'];
     }
 
@@ -330,7 +352,7 @@ class Client
     {
         $_COOKIE[$this->cookieName . '_c']++;
         setcookie($this->cookieName . '_c', $_COOKIE[$this->cookieName . '_c'], time() + 300, '/',
-            '.' . $this->getBaseHttpHost());
+            '.' . $this->getCookieDomain());
     }
 
     /**
@@ -341,7 +363,7 @@ class Client
     protected function getErrorCounter()
     {
         if (!array_key_exists($this->cookieName . '_c', $_COOKIE)) {
-            setcookie($this->cookieName . '_c', 0, time() + 300, '/', '.' . $this->getBaseHttpHost());
+            setcookie($this->cookieName . '_c', 0, time() + 300, '/', '.' . $this->getCookieDomain());
             $_COOKIE[$this->cookieName . '_c'] = 0;
         }
 
