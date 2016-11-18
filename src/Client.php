@@ -197,7 +197,7 @@ class Client
         }
 
         if (array_key_exists('cookie_domain', $params)) {
-            $this->cookieDomain = $params['cookie_domain'];
+            $this->setCookieDomain($params['cookie_domain']);
         }
 
     }
@@ -230,7 +230,8 @@ class Client
 
     public function setCookieDomain($domain)
     {
-        $this->cookieDomain = trim($domain, '.');
+        $domain = trim($domain, '.');
+        $this->cookieDomain = (strpos($domain, '.') !== false ? '.' : '') . $domain;
     }
 
     /**
@@ -240,7 +241,7 @@ class Client
      */
     protected function handleSSOResponse()
     {
-        setcookie($this->cookieName, $_GET['sso_code'], time() + 31556926, '/', '.' . $this->getCookieDomain());
+        setcookie($this->cookieName, $_GET['sso_code'], time() + 31556926, '/', $this->getCookieDomain());
         $_COOKIE[$this->cookieName] = $_GET['sso_code'];
     }
 
@@ -351,8 +352,7 @@ class Client
     protected function incrementErrorCounter()
     {
         $_COOKIE[$this->cookieName . '_c']++;
-        setcookie($this->cookieName . '_c', $_COOKIE[$this->cookieName . '_c'], time() + 300, '/',
-            '.' . $this->getCookieDomain());
+        setcookie($this->cookieName . '_c', $_COOKIE[$this->cookieName . '_c'], time() + 300, '/', $this->getCookieDomain());
     }
 
     /**
@@ -363,7 +363,7 @@ class Client
     protected function getErrorCounter()
     {
         if (!array_key_exists($this->cookieName . '_c', $_COOKIE)) {
-            setcookie($this->cookieName . '_c', 0, time() + 300, '/', '.' . $this->getCookieDomain());
+            setcookie($this->cookieName . '_c', 0, time() + 300, '/', $this->getCookieDomain());
             $_COOKIE[$this->cookieName . '_c'] = 0;
         }
 
