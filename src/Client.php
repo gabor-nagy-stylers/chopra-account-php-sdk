@@ -513,6 +513,12 @@ class Client
      */
     public function getSocialLoginUrl($redirect_url, $social_type, Array $social_data)
     {
+        if ($social_data['id'] === null || $social_data['id'] === '') {
+            throw new \BadMethodCallException("Social id can not be null or empty!");
+        }
+        if ($social_data['token'] === null || $social_data['token'] === '') {
+            throw new \BadMethodCallException("Social token can not be null or empty!");
+        }
         return $this->endpointBasePath . $this->authSocialEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url) . '&social_type=' . $social_type . '&social_id=' . $social_data['id'] . '&social_token=' . $this->encryptSocialToken($social_data['token']);
     }
 
