@@ -145,7 +145,7 @@ Parameters of getSocialLoginUrl:
 
 2.  social network type, options: google, facebook
 
-3.  In php array: ['id' => '{social_id}', 'token' => '{social_token}' ] – obviously, social id and social token must be substituted with the proper values.
+3.  In php array: ['id' => '{social_id}', 'token' => '{social_token}' ] – obviously, social id and social token must be substituted with the proper values. These two values are required, can not be null or empty, otherwise SDK will raise an exception.
 
 The processing workflow following the redirect is the same as in the case of a normal login.
 
