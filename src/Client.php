@@ -456,6 +456,12 @@ class Client
         return $this->encryptData($token);
     }
 
+    /**
+     * Encrypts data for secure transfer.
+     *
+     * @param $data
+     * @return string
+     */
     protected function encryptData($data)
     {
         $iv = openssl_random_pseudo_bytes(16);
@@ -563,12 +569,13 @@ class Client
      * @param bool $activate_user
      * @return string
      */
-    public function getAutoLoginUrl($redirect_url, $sso_id, $activate_user = false)
+    public function getAutoLoginUrl($redirect_url, $sso_id, $activate_user = false, $force_redirect_url = null)
     {
         $hashData = [
             'sso_id' => $sso_id,
             'activate_user' => $activate_user,
-            'expiration_date' => time() + 86400
+            'expiration_date' => time() + 86400,
+            'force_redirect_url' => $force_redirect_url
         ];
 
         $hash = $this->encryptData($hashData);
