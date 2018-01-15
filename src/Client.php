@@ -118,6 +118,12 @@ class Client
     protected $registerEndpoint = 'registration';
 
     /**
+     * Contains SSO autologin endpoint path.
+     * @var string
+     */
+    protected $autoLoginEndpoint = 'user/autologin';
+
+    /**
      * Contains API endpoint url.
      *
      * @var string
@@ -447,8 +453,13 @@ class Client
      */
     protected function encryptSocialToken($token)
     {
+        return $this->encryptData($token);
+    }
+
+    protected function encryptData($data)
+    {
         $iv = openssl_random_pseudo_bytes(16);
-        $value = openssl_encrypt(serialize($token), $this->cipher, $this->clientSecret, 0, $iv);
+        $value = openssl_encrypt(serialize($data), $this->cipher, $this->clientSecret, 0, $iv);
         $mac = hash_hmac('sha256', ($iv = base64_encode($iv)) . $value, $this->clientSecret);
 
         return base64_encode(json_encode(compact('iv', 'value', 'mac')));
@@ -542,6 +553,27 @@ class Client
     public function getRegistrationUrl($redirect_url)
     {
         return $this->endpointBasePath . $this->registerEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+    }
+
+    /**
+     * Returns SSO autologin url.
+     *
+     * @param $redirect_url
+     * @param $sso_id
+     * @param bool $activate_user
+     * @return string
+     */
+    public function getAutoLoginUrl($redirect_url, $sso_id, $activate_user = false)
+    {
+        $hashData = [
+            'sso_id' => $sso_id,
+            'activate_user' => $activate_user,
+            'expiration_date' => time() + 86400
+        ];
+
+        $hash = $this->encryptData($hashData);
+
+        return $this->endpointBasePath . $this->autoLoginEndpoint . '/' . $hash . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
     }
 
     /**
