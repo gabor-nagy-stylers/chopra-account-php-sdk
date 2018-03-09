@@ -225,11 +225,17 @@ class Client
             $host = $_SERVER['HTTP_HOST'];
         }
 
-        $segments = explode('.', $host);
-        if (count($segments) < 2) {
-            return $host;
+        $host = preg_replace("/(.+)\:.+/i", "$1", $host);
+
+        if (preg_match("\b(?:\d{1,3}\.){3}\d{1,3}\b", $host)) {
+            $this->cookieDomain = $host;
+        } else {
+            $segments = explode('.', $host);
+            if (count($segments) < 2) {
+                return $host;
+            }
+            $this->cookieDomain = $segments[count($segments) - 2] . '.' . $segments[count($segments) - 1];
         }
-        $this->cookieDomain = $segments[count($segments) - 2] . '.' . $segments[count($segments) - 1];
 
         return $this->cookieDomain;
     }
