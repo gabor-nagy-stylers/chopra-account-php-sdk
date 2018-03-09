@@ -227,7 +227,7 @@ class Client
 
         $host = preg_replace("/(.+)\:.+/i", "$1", $host);
 
-        if (preg_match("\b(?:\d{1,3}\.){3}\d{1,3}\b", $host)) {
+        if (preg_match("/\b(?:\d{1,3}\.){3}\d{1,3}\b/", $host)) {
             $this->cookieDomain = $host;
         } else {
             $segments = explode('.', $host);
