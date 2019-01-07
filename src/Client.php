@@ -158,6 +158,11 @@ class Client
     protected $codeEncrypter;
 
     /**
+     * @var string
+     */
+    protected $overridePlatformHostname;
+
+    /**
      * Initializes the SSO SDK Client object, and API / Session objects if needed.
      *
      * @param array $params Associative array with appropriate parameters for SSO connection.
@@ -452,7 +457,9 @@ class Client
      */
     public function getLoginUrl($redirect_url)
     {
-        return $this->endpointBasePath . $this->authEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+        $url = $this->endpointBasePath . $this->authEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+
+        return $this->finalizeUrl($url);
     }
 
     /**
@@ -464,7 +471,9 @@ class Client
     public function getCheckUrl($redirect_url)
     {
         $reasonCode = (null !== $this->lastException->getPrevious() && $this->lastException->getPrevious() instanceof \MemcachedException ? 'mc_' : '') . ($this->lastException ? $this->lastException->getCode() : '');
-        return $this->endpointBasePath . $this->checkEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url) . '&reason_code=' . $reasonCode;
+        $url = $this->endpointBasePath . $this->checkEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url) . '&reason_code=' . $reasonCode;
+
+        return $this->finalizeUrl($url);
     }
 
     /**
@@ -475,7 +484,9 @@ class Client
      */
     public function getLogoutUrl($redirect_url)
     {
-        return $this->endpointBasePath . $this->logoutEndpoint . '?redirect_url=' . urlencode($redirect_url);
+        $url = $this->endpointBasePath . $this->logoutEndpoint . '?redirect_url=' . urlencode($redirect_url);
+
+        return $this->finalizeUrl($url);
     }
 
     /**
@@ -494,7 +505,10 @@ class Client
         if ($social_data['token'] === null || $social_data['token'] === '') {
             throw new \BadMethodCallException("Social token can not be null or empty!");
         }
-        return $this->endpointBasePath . $this->authSocialEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url) . '&social_type=' . $social_type . '&social_id=' . $social_data['id'] . '&social_token=' . $this->codeEncrypter->encryptSocialToken($social_data['token']);
+
+        $url = $this->endpointBasePath . $this->authSocialEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url) . '&social_type=' . $social_type . '&social_id=' . $social_data['id'] . '&social_token=' . $this->codeEncrypter->encryptSocialToken($social_data['token']);
+
+        return $this->finalizeUrl($url);
     }
 
     /**
@@ -505,7 +519,9 @@ class Client
      */
     public function getProfileEditUrl($redirect_url)
     {
-        return $this->endpointBasePath . $this->profileEditEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+        $url = $this->endpointBasePath . $this->profileEditEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+
+        return $this->finalizeUrl($url);
     }
 
     /**
@@ -516,7 +532,9 @@ class Client
      */
     public function getRegistrationUrl($redirect_url)
     {
-        return $this->endpointBasePath . $this->registerEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+        $url = $this->endpointBasePath . $this->registerEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+
+        return $this->finalizeUrl($url);
     }
 
     /**
@@ -538,7 +556,9 @@ class Client
 
         $hash = $this->codeEncrypter->encryptData($hashData);
 
-        return $this->endpointBasePath . $this->autoLoginEndpoint . '/' . $hash . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+        $url = $this->endpointBasePath . $this->autoLoginEndpoint . '/' . $hash . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
+
+        return $this->finalizeUrl($url);
     }
 
     /**
@@ -549,6 +569,25 @@ class Client
     public function setApiKey($key)
     {
         $this->apiKey = $key;
+    }
+
+    /**
+     * @param string $overridePlatformHostname
+     * @return Client
+     */
+    public function setOverridePlatformHostname($overridePlatformHostname)
+    {
+        $this->overridePlatformHostname = $overridePlatformHostname;
+        return $this;
+    }
+
+    protected function finalizeUrl($url)
+    {
+        if ($this->overridePlatformHostname) {
+            $url .= '&override_platform_hostname=' . $this->overridePlatformHostname;
+        }
+
+        return $url;
     }
 
 }
