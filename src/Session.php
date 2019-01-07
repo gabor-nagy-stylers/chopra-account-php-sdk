@@ -146,6 +146,4 @@ class Session
             throw new \MemcachedException('Memcache error: ' . $this->connection->getResultMessage(), $resultCode);
         }
     }
-
-
 }

@@ -39,20 +39,6 @@ class Client
     protected $sessionPort;
 
     /**
-     * The algorithm used for encryption.
-     *
-     * @var string
-     */
-    protected $cipher = 'AES-256-CBC';
-
-    /**
-     * The block size of the cipher.
-     *
-     * @var int
-     */
-    protected $block = 16;
-
-    /**
      * Contains the session connector object.
      *
      * @var null
@@ -167,6 +153,11 @@ class Client
     protected $cookieDomain;
 
     /**
+     * @var CodeEncrypter
+     */
+    protected $codeEncrypter;
+
+    /**
      * Initializes the SSO SDK Client object, and API / Session objects if needed.
      *
      * @param array $params Associative array with appropriate parameters for SSO connection.
@@ -205,6 +196,8 @@ class Client
         if (array_key_exists('cookie_domain', $params)) {
             $this->setCookieDomain($params['cookie_domain']);
         }
+
+        $this->codeEncrypter = new CodeEncrypter($this->clientSecret);
 
     }
 
@@ -326,7 +319,7 @@ class Client
         if (!array_key_exists($this->cookieName, $_COOKIE)) {
             throw new SSOAuthException('No cookie', SSOAuthException::ERROR_NO_COOKIE);
         }
-        $decrypted = $this->decryptCode($_COOKIE[$this->cookieName]);
+        $decrypted = $this->codeEncrypter->decryptCode($_COOKIE[$this->cookieName]);
 
         if (false === $decrypted) {
             throw new SSOAuthException('Can\'t decrypt cookie.', SSOAuthException::ERROR_DECRYPT);
@@ -452,47 +445,6 @@ class Client
     }
 
     /**
-     * Encrypts social token for secure transfer.
-     *
-     * @param $token
-     * @return string
-     */
-    protected function encryptSocialToken($token)
-    {
-        return $this->encryptData($token);
-    }
-
-    /**
-     * Encrypts data for secure transfer.
-     *
-     * @param $data
-     * @return string
-     */
-    protected function encryptData($data)
-    {
-        $iv = openssl_random_pseudo_bytes(16);
-        $value = openssl_encrypt(serialize($data), $this->cipher, $this->clientSecret, 0, $iv);
-        $mac = hash_hmac('sha256', ($iv = base64_encode($iv)) . $value, $this->clientSecret);
-
-        return base64_encode(json_encode(compact('iv', 'value', 'mac')));
-    }
-
-    /**
-     * Decrypts SSO code got from SSO Front site after login.
-     *
-     * @param $code
-     * @return mixed
-     */
-    protected function decryptCode($code)
-    {
-        $payload = json_decode(base64_decode($code), true);
-        $iv = base64_decode($payload['iv']);
-        $decrypted = openssl_decrypt($payload['value'], $this->cipher, $this->clientSecret, 0, $iv);
-
-        return unserialize($decrypted);
-    }
-
-    /**
      * Returns SSO Simple Login url.
      *
      * @param $redirect_url Full qualified url to redirect back after successful login.
@@ -542,7 +494,7 @@ class Client
         if ($social_data['token'] === null || $social_data['token'] === '') {
             throw new \BadMethodCallException("Social token can not be null or empty!");
         }
-        return $this->endpointBasePath . $this->authSocialEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url) . '&social_type=' . $social_type . '&social_id=' . $social_data['id'] . '&social_token=' . $this->encryptSocialToken($social_data['token']);
+        return $this->endpointBasePath . $this->authSocialEndpoint . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url) . '&social_type=' . $social_type . '&social_id=' . $social_data['id'] . '&social_token=' . $this->codeEncrypter->encryptSocialToken($social_data['token']);
     }
 
     /**
@@ -584,7 +536,7 @@ class Client
             'force_redirect_url' => $force_redirect_url
         ];
 
-        $hash = $this->encryptData($hashData);
+        $hash = $this->codeEncrypter->encryptData($hashData);
 
         return $this->endpointBasePath . $this->autoLoginEndpoint . '/' . $hash . '?client_key=' . $this->clientKey . '&redirect_url=' . urlencode($redirect_url);
     }
